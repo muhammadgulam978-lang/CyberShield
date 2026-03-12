@@ -2,10 +2,11 @@ import 'package:cybershield_mobile/features/auth/bloc/scan_bloc.dart';
 import 'package:cybershield_mobile/features/auth/bloc/scan_event.dart';
 import 'package:cybershield_mobile/features/auth/bloc/scan_state.dart';
 import 'package:cybershield_mobile/features/auth/repository/auth_repository.dart';
-import 'package:cybershield_mobile/scan/services/scan_service.dart'; // Add this import
-import 'package:cybershield_mobile/scan/model/scan_model.dart'; // Add this import
+import 'package:cybershield_mobile/scan/services/scan_service.dart';
+import 'package:cybershield_mobile/scan/model/scan_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'scan_details_screen.dart'; // 👈 Detail screen ka import zaroori hai
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -16,21 +17,23 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen> {
   final TextEditingController _urlController = TextEditingController();
-  final ScanService _scanService = ScanService(); // Service instance
-  List<ScanResultModel> _history = []; // History list state
+  final ScanService _scanService = ScanService();
+  List<ScanResultModel> _history = [];
 
   @override
   void initState() {
     super.initState();
-    _loadHistory(); // Load history on start
+    _loadHistory();
   }
 
-  // Database se history fetch karne ka function
   Future<void> _loadHistory() async {
+    // Note: Yahan "tester" ki jagah baad mein logged-in username use kar sakte hain
     final results = await _scanService.getScanHistory("tester");
-    setState(() {
-      _history = results;
-    });
+    if (mounted) {
+      setState(() {
+        _history = results;
+      });
+    }
   }
 
   @override
@@ -42,22 +45,20 @@ class _ScanScreenState extends State<ScanScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          // IconButton update karein
-IconButton(
-  icon: const Icon(Icons.logout, color: Colors.redAccent),
-  onPressed: () async {
-    // AuthRepository ka instance banayein (ya Bloc use karein)
-    final authRepo = AuthRepository(); 
-    
-    // 1. Token delete karein
-    await authRepo.logout();
-    
-    // 2. Login Screen par wapis bhej dein
-    if (mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-    }
-  },
-)
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.redAccent),
+            onPressed: () async {
+              final authRepo = AuthRepository();
+              await authRepo.logout();
+              if (mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (route) => false,
+                );
+              }
+            },
+          ),
         ],
       ),
       body: BlocConsumer<ScanBloc, ScanState>(
@@ -68,16 +69,18 @@ IconButton(
             );
           }
           if (state is ScanSuccess) {
-            _loadHistory(); // Scan success hote hi history refresh karein
+            _loadHistory();
           }
         },
         builder: (context, state) {
           return Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Column( // SingleChildScrollView se Column mein change kiya for List compatibility
+            child: Column(
               children: [
-                const Text("Enter URL for Security Analysis",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                const Text(
+                  "Enter URL for Security Analysis",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                ),
                 const SizedBox(height: 20),
                 TextField(
                   controller: _urlController,
@@ -85,8 +88,13 @@ IconButton(
                   decoration: InputDecoration(
                     hintText: "example.com",
                     hintStyle: const TextStyle(color: Colors.white38),
-                    prefixIcon: const Icon(Icons.link, color: Colors.cyanAccent),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: const Icon(
+                      Icons.link,
+                      color: Colors.cyanAccent,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(color: Colors.white24),
@@ -94,7 +102,7 @@ IconButton(
                   ),
                 ),
                 const SizedBox(height: 30),
-                
+
                 if (state is ScanLoading)
                   const CircularProgressIndicator(color: Colors.cyanAccent)
                 else
@@ -106,53 +114,96 @@ IconButton(
                     ),
                     onPressed: () {
                       if (_urlController.text.isNotEmpty) {
-                        context.read<ScanBloc>().add(UrlScanRequested(_urlController.text));
+                        context.read<ScanBloc>().add(
+                          UrlScanRequested(_urlController.text),
+                        );
                       }
                     },
-                    child: const Text("START ANALYSIS",
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      "START ANALYSIS",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
-                
+
                 const SizedBox(height: 30),
-                
-                // --- CURRENT RESULT ---
+
                 if (state is ScanSuccess) _buildResultCard(state.result),
 
                 const SizedBox(height: 20),
                 const Divider(color: Colors.white24),
 
-                // --- HISTORY SECTION START ---
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 10),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text("RECENT SCANS", 
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
+                    child: Text(
+                      "RECENT SCANS",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.cyanAccent,
+                      ),
+                    ),
                   ),
                 ),
 
                 Expanded(
                   child: _history.isEmpty
-                      ? const Center(child: Text("No history available", style: TextStyle(color: Colors.white38)))
+                      ? const Center(
+                          child: Text(
+                            "No history available",
+                            style: TextStyle(color: Colors.white38),
+                          ),
+                        )
                       : ListView.builder(
                           itemCount: _history.length,
                           itemBuilder: (context, index) {
                             final item = _history[index];
-                            Color statusColor = item.status == "PHISHING" 
-                                ? Colors.redAccent 
-                                : (item.status == "SUSPICIOUS" ? Colors.orangeAccent : Colors.greenAccent);
+                            Color statusColor = item.status == "PHISHING"
+                                ? Colors.redAccent
+                                : (item.status == "SUSPICIOUS"
+                                      ? Colors.orangeAccent
+                                      : Colors.greenAccent);
 
                             return ListTile(
+                              onTap: () {
+                                // 🎯 Task 1 Complete: Detail Screen Navigation
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ScanDetailsScreen(scan: item),
+                                  ),
+                                );
+                              },
                               contentPadding: EdgeInsets.zero,
-                              leading: Icon(Icons.history, color: statusColor.withOpacity(0.7)),
-                              title: Text(item.url, style: const TextStyle(color: Colors.white, fontSize: 14)),
-                              subtitle: Text("Score: ${item.riskScore}%", style: const TextStyle(color: Colors.white38, fontSize: 12)),
-                              trailing: Text(item.status, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                              leading: Icon(
+                                Icons.history,
+                                color: statusColor.withOpacity(0.7),
+                              ),
+                              title: Text(
+                                item.url,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              subtitle: Text(
+                                "Score: ${item.riskScore}%",
+                                style: const TextStyle(
+                                  color: Colors.white38,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              trailing: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 14,
+                                color: Colors.white24,
+                              ),
                             );
                           },
                         ),
                 ),
-                // --- HISTORY SECTION END ---
               ],
             ),
           );
@@ -161,11 +212,10 @@ IconButton(
     );
   }
 
-  // --- AAPKA ORIGINAL RESULT CARD CODE ---
   Widget _buildResultCard(Map<String, dynamic> result) {
     final String status = result['status'] ?? 'UNKNOWN';
     final int score = result['riskScore'] ?? 0;
-    
+
     Color mainColor;
     IconData statusIcon;
     String statusText;
@@ -206,9 +256,9 @@ IconButton(
                 Text(
                   statusText,
                   style: TextStyle(
-                    fontSize: 18, 
-                    fontWeight: FontWeight.bold, 
-                    color: mainColor
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: mainColor,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -229,7 +279,10 @@ IconButton(
                     padding: EdgeInsets.only(top: 8.0),
                     child: Text(
                       "Long URL or unusual domain detected. Proceed with caution.",
-                      style: TextStyle(color: Colors.orangeAccent, fontSize: 12),
+                      style: TextStyle(
+                        color: Colors.orangeAccent,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
               ],

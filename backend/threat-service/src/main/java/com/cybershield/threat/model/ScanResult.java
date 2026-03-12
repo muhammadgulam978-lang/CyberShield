@@ -1,51 +1,62 @@
 package com.cybershield.threat.model;
 
-import jakarta.persistence.*; // Zaroori annotations ke liye
+import jakarta.persistence.*; 
 import java.time.LocalDateTime;
 
-@Entity // Is se Spring Boot table banayega
+@Entity 
 @Table(name = "scan_history")
 public class ScanResult {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Database Primary Key
+    private Long id; 
 
     private String url;
     private int riskScore;
     private String status;
-    private String username; // History track karne ke liye naya field
-    private LocalDateTime scanTimestamp; // Time track karne ke liye
+    private String username; 
+    
+    @Column(name = "ip_address") // Naya field jo humne SQL mein add kiya
+    private String ipAddress;
 
-    // 1. Default Constructor (Already present)
+    private LocalDateTime scanTimestamp; 
+
+    // 1. Default Constructor
     public ScanResult() {}
 
-    // 2. Original Parameterized Constructor (Already present)
+    // 2. Original Parameterized Constructor
     public ScanResult(String url, int riskScore, String status) {
         this.url = url;
         this.riskScore = riskScore;
         this.status = status;
+        this.scanTimestamp = LocalDateTime.now();
     }
 
-    // 3. NEW Constructor (Error fix karne ke liye - 4 Arguments)
-    public ScanResult(String url, int riskScore, String status, String username) {
+    // 3. Updated Constructor (5 Arguments - IP Address ke saath)
+    public ScanResult(String url, int riskScore, String status, String username, String ipAddress) {
         this.url = url;
         this.riskScore = riskScore;
         this.status = status;
         this.username = username;
-        this.scanTimestamp = LocalDateTime.now(); // Auto current time
+        this.ipAddress = ipAddress;
+        this.scanTimestamp = LocalDateTime.now();
     }
 
-    // --- Getters (Pehle wale + Naye wale) ---
+    // --- Getters ---
     public Long getId() { return id; }
     public String getUrl() { return url; }
     public int getRiskScore() { return riskScore; }
     public String getStatus() { return status; }
     public String getUsername() { return username; }
+    public String getIpAddress() { return ipAddress; } // Naya Getter
     public LocalDateTime getScanTimestamp() { return scanTimestamp; }
 
-    // Setters (JPA ke liye zaroori hain)
+    // --- Setters ---
     public void setId(Long id) { this.id = id; }
+    public void setUrl(String url) { this.url = url; }
+    public void setRiskScore(int riskScore) { this.riskScore = riskScore; }
+    public void setStatus(String status) { this.status = status; }
     public void setUsername(String username) { this.username = username; }
+    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; } // Naya Setter
     public void setScanTimestamp(LocalDateTime scanTimestamp) { this.scanTimestamp = scanTimestamp; }
 }

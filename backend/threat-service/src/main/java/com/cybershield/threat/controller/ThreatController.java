@@ -9,41 +9,64 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/threat")
-@CrossOrigin(origins = "*") // 👈 Crucial for Flutter Web/Android
+@CrossOrigin(origins = "*") 
 public class ThreatController {
 
     @Autowired
     private ScanRepository scanRepository;
 
     @GetMapping("/scan")
-    public ScanResult scanUrl(@RequestParam String url) {
-        System.out.println("===> DEBUG: Authenticated Scan for: " + url);
-
-        List<String> dangerKeywords = Arrays.asList("login", "verify", "update", "bank", "secure", "free");
-        List<String> suspiciousTlds = Arrays.asList(".xyz", ".top", ".gq", ".ml", ".cf", ".tk", ".bit");
-
-        String lowerUrl = url.toLowerCase();
-        boolean hasDangerWord = dangerKeywords.stream().anyMatch(lowerUrl::contains);
-        boolean hasSuspiciousTld = suspiciousTlds.stream().anyMatch(tld -> lowerUrl.endsWith(tld));
-
-        int score = 10;
-        String status = "SAFE";
-
-        if (hasDangerWord) {
-            score = 85;
-            status = "PHISHING";
-        } else if (hasSuspiciousTld || url.length() > 50) {
-            score = 50;
-            status = "SUSPICIOUS";
+    public ScanResult scanURL(@RequestParam String url, @RequestParam(required = false, defaultValue = "Guest") String username) {
+        // 1. Fetch IP Address
+        String fetchedIp;
+        try {
+            // URL clean up for IP fetching
+            String host = url.replace("http://", "").replace("https://", "").split("/")[0];
+            fetchedIp = java.net.InetAddress.getByName(host).getHostAddress();
+        } catch (Exception e) {
+            fetchedIp = "Unavailable";
         }
 
-        // Hardcoded "tester" for now, or get from SecurityContext
-        ScanResult result = new ScanResult(url, score, status, "tester");
+        // 2. Risk Calculation (Engine Logic)
+        int score = calculateRisk(url);
+        String status = (score > 40) ? "SUSPICIOUS" : "SAFE";
+
+        // 3. Create & Save Result (Constructor matching our new model)
+        ScanResult result = new ScanResult(url, score, status, username, fetchedIp);
+        
         return scanRepository.save(result);
     }
 
     @GetMapping("/history")
     public List<ScanResult> getScanHistory(@RequestParam String username) {
         return scanRepository.findByUsernameOrderByScanTimestampDesc(username);
+    }
+
+    // 🛡️ Internal Threat Engine Method
+    private int calculateRisk(String url) {
+        int score = 10; // Base score for any site
+        
+        // List of high-risk keywords
+        List<String> riskyKeywords = Arrays.asList("login", "verify", "bank", "free", "gift", "update", "account");
+        
+        // List of high-risk TLDs
+        List<String> riskyTlds = Arrays.asList(".xyz", ".tk", ".ml", ".ga", ".cf");
+
+        // Keyword check
+        for (String word : riskyKeywords) {
+            if (url.toLowerCase().contains(word)) {
+                score += 20;
+            }
+        }
+
+        // TLD check
+        for (String tld : riskyTlds) {
+            if (url.toLowerCase().endsWith(tld)) {
+                score += 30;
+            }
+        }
+
+        // Cap score at 100
+        return Math.min(score, 100);
     }
 }

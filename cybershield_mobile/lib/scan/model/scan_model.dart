@@ -5,6 +5,7 @@ class ScanResultModel {
   final String status;
   final String? scanTimestamp;
   final String? username;
+  final String? ipAddress; // 👈 Yeh missing tha, isliye error aa raha tha
 
   ScanResultModel({
     this.id,
@@ -13,9 +14,9 @@ class ScanResultModel {
     required this.status,
     this.scanTimestamp,
     this.username,
+    this.ipAddress, // 👈 Constructor mein add kiya
   });
 
-  // Backend (JSON) se Flutter object banane ke liye
   factory ScanResultModel.fromJson(Map<String, dynamic> json) {
     return ScanResultModel(
       id: json['id'],
@@ -24,10 +25,10 @@ class ScanResultModel {
       status: json['status'] ?? 'UNKNOWN',
       scanTimestamp: json['scanTimestamp'],
       username: json['username'],
+      ipAddress: json['ipAddress'] ?? 'N/A', // 👈 JSON se map kiya
     );
   }
 
-  // Flutter object ko JSON mein badalne ke liye (optional)
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -36,6 +37,7 @@ class ScanResultModel {
       'status': status,
       'scanTimestamp': scanTimestamp,
       'username': username,
+      'ipAddress': ipAddress,
     };
   }
 }
