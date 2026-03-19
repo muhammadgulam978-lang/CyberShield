@@ -8,6 +8,7 @@ import 'package:cybershield_mobile/scan/model/scan_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'scan_details_screen.dart';
+import 'scan_history_screen.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -82,6 +83,20 @@ class _ScanScreenState extends State<ScanScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          // 🔥 NAYA BUTTON (No changes to old code)
+          IconButton(
+            icon: const Icon(Icons.history, color: Colors.blueAccent),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ScanHistoryScreen(),
+                ),
+              );
+            },
+          ),
+
+          // AAPKA PURANA LOGOUT BUTTON (Waisa hi hai)
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.redAccent),
             onPressed: () async {

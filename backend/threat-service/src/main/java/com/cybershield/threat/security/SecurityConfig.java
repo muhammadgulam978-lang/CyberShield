@@ -41,7 +41,6 @@ public class SecurityConfig {
                 
                 .anyRequest().authenticated() 
             )
-            // Filter abhi bhi chain mein hai lekin permitAll ki wajah se bypass ho jayega
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -51,10 +50,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        // Dev environment ke liye sab allowed hai
         config.setAllowedOriginPatterns(Arrays.asList("*")); 
-        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization"));
+        
+        // 🔥 UPDATE: Added "Content-Disposition" and "ExposedHeaders" for PDF Download
+        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        // Ye line browser ko batati hai ke PDF ka filename (Content-Disposition) parhna allowed hai
+        config.setExposedHeaders(Arrays.asList("Content-Disposition", "Authorization"));
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
