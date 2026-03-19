@@ -168,44 +168,56 @@ class _ScanScreenState extends State<ScanScreen> {
   Widget _buildAnimatedLoader() {
     return Container(
       padding: const EdgeInsets.all(20),
+      width: double.infinity, // Poori width le taaki list saaf dikhe
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.cyanAccent.withOpacity(0.3)),
+        border: Border.all(color: Colors.cyanAccent.withOpacity(0.2)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           const CircularProgressIndicator(color: Colors.cyanAccent),
-          const SizedBox(height: 25),
-          // Ye loop ab tak ke saare steps dikhayega
+          const SizedBox(height: 30),
+
+          // 📜 List of Steps (Ek ke niche ek)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: List.generate(_currentStep + 1, (index) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.check_circle_outline,
-                      color: Colors.cyanAccent,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _analysisSteps[index],
-                        style: TextStyle(
-                          color: index == _currentStep
-                              ? Colors.cyanAccent
-                              : Colors.white54,
-                          fontWeight: index == _currentStep
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          fontSize: 13,
+              return AnimatedOpacity(
+                duration: const Duration(milliseconds: 500),
+                opacity: 1.0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      // Agar step purana hai toh Tick, agar current hai toh Arrow
+                      Icon(
+                        index < _currentStep
+                            ? Icons.check_circle
+                            : Icons.chevron_right,
+                        color: index < _currentStep
+                            ? Colors.greenAccent
+                            : Colors.cyanAccent,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _analysisSteps[index],
+                          style: TextStyle(
+                            color: index == _currentStep
+                                ? Colors.cyanAccent
+                                : Colors.white38,
+                            fontWeight: index == _currentStep
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             }),
