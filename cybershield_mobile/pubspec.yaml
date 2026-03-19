@@ -39,9 +39,10 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   web_socket_channel: ^3.0.3
   go_router: ^17.1.0
-  syncfusion_flutter_gauges: ^33.1.44
+  syncfusion_flutter_gauges: 33.1.44
   url_launcher: ^6.2.5  # PDF link open karne ke liye
   path_provider: ^2.1.2
+  syncfusion_flutter_charts: 33.1.44
 
 dev_dependencies:
   flutter_test:
