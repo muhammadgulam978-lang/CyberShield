@@ -5,7 +5,7 @@ class ScanResultModel {
   final String status;
   final String? scanTimestamp;
   final String? username;
-  final String? ipAddress; // 👈 Yeh missing tha, isliye error aa raha tha
+  final String? ipAddress;
 
   ScanResultModel({
     this.id,
@@ -14,7 +14,7 @@ class ScanResultModel {
     required this.status,
     this.scanTimestamp,
     this.username,
-    this.ipAddress, // 👈 Constructor mein add kiya
+    this.ipAddress,
   });
 
   factory ScanResultModel.fromJson(Map<String, dynamic> json) {
@@ -25,7 +25,7 @@ class ScanResultModel {
       status: json['status'] ?? 'UNKNOWN',
       scanTimestamp: json['scanTimestamp'],
       username: json['username'],
-      ipAddress: json['ipAddress'] ?? 'N/A', // 👈 JSON se map kiya
+      ipAddress: json['ipAddress'] ?? 'N/A', // Mapping IP from Backend
     );
   }
 
