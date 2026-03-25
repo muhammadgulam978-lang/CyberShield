@@ -3,9 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../core/constants/api_constants.dart';
 
 class AuthRepository {
-  final Dio _dio = Dio(BaseOptions(
-    validateStatus: (status) => status! < 500,
-  ));
+  final Dio _dio = Dio(BaseOptions(validateStatus: (status) => status! < 500));
   final _storage = const FlutterSecureStorage();
 
   Future<bool> login(String username, String password) async {
@@ -17,11 +15,11 @@ class AuthRepository {
 
       if (response.statusCode == 200) {
         String token = "";
-        
+
         // Agar response JSON Map hai: { "token": "ey..." }
         if (response.data is Map) {
           token = response.data['token']?.toString() ?? "";
-        } 
+        }
         // Agar response sirf plain text hai
         else {
           token = response.data.toString();
