@@ -1,10 +1,3 @@
-// abstract class ScanEvent {}
-
-// class UrlScanRequested extends ScanEvent {
-//   final String url;
-//   UrlScanRequested(this.url);
-// }
-
 abstract class ScanEvent {}
 
 /// 🔍 1. Jab user URL enter karke "Start Analysis" dabaye
