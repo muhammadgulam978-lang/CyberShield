@@ -11,7 +11,6 @@
 
 ## 📌 System Overview
 <p align="center">
-<img src="https://raw.githubusercontent.com/username/repo/branch/screenshots/banner.png" width="800" alt="CyberShield Banner (Create a banner for a super professional look)">
 </p>
 
 CyberShield is a distributed, **microservices-driven cybersecurity platform** designed to mitigate web-based threats. By leveraging **AI-driven heuristic analysis** and **real-time metadata extraction**, it provides users with a comprehensive security posture against phishing and malicious URLs.
